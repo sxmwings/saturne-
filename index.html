@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Ultimate — Heatmap Musculaire (SVG détaillé)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#07070a;
+    --card:#0f1720;
+    --accent:#ff8a00;
+    --muted:#9aa3b2;
+    --white:#ffffff;
+  }
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,#071020,#000);color:var(--white);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;}
+  header{padding:18px;text-align:center;font-weight:800;letter-spacing:0.6px;background:linear-gradient(90deg,#ff7a00,#ffbd59);color:#000}
+  main{max-width:1100px;margin:18px auto;padding:18px;display:grid;grid-template-columns:440px 1fr;gap:18px}
+  .panel{background:rgba(255,255,255,0.03);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.04)}
+  .title{font-size:18px;font-weight:700;margin-bottom:8px;color:var(--accent)}
+  #svgContainer{display:flex;flex-direction:column;gap:12px;align-items:center}
+  #muscleSVG{width:340px;height:auto}
+  .legend{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:8px}
+  .legend .box{width:20px;height:12px;border-radius:4px}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  button{background:var(--accent);border:none;color:#000;padding:8px 12px;border-radius:10px;font-weight:700;cursor:pointer}
+  button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--white)}
+  .tooltip{
+    position:fixed;pointer-events:none;z-index:9999;background:rgba(12,14,18,0.95);
+    color:var(--white);padding:8px 10px;border-radius:8px;font-size:13px;border:1px solid rgba(255,255,255,0.06)
+  }
+  .small{font-size:13px;color:var(--muted)}
+  .chartwrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  .footer{grid-column:1/-1;margin-top:8px;color:var(--muted);font-size:13px;text-align:center}
+  @media(max-width:980px){main{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<header>Ultimate — Heatmap Musculaire SVG (détaillée) — V5</header>
+
+<main>
+  <section class="panel" aria-label="Heatmap et contrôle">
+    <div class="title">Carte musculaire</div>
+
+    <div id="svgContainer">
+      <!-- SVG stylisé — chaque zone a un id m-xxx -->
+      <svg id="muscleSVG" viewBox="0 0 300 600" role="img" aria-label="Silhouette musculaire heatmap">
+        <defs>
+          <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+
+        <!-- Neck / upper traps -->
+        <path id="m-trapezes" d="M140 50 C150 40,170 40,180 50 C182 60,180 70,160 78 C140 70,138 60,140 50 Z" fill="#222"/>
+
+        <!-- Shoulders -->
+        <path id="m-epaules-g" d="M100 80 C70 95,70 130,100 150 C115 135,120 110,110 85 Z" fill="#222"/>
+        <path id="m-epaules-d" d="M200 80 C230 95,230 130,200 150 C185 135,180 110,190 85 Z" fill="#222"/        >
+
+        <!-- Chest -->
+        <path id="m-pectoraux" d="M115 120 C130 100,170 100,185 120 C198 150,170 200,150 220 C130 200,100 150,115 120 Z" fill="#222"/>
+
+        <!-- Upper back (latissimus) -->
+        <path id="m-dos" d="M85 120 C60 140,60 220,100 260 C110 240,100 160,85 130 Z" fill="#1a1a1a"/>
+        <path d="M215 120 C240 140,240 220,200 260 C190 240,200 160,215 130 Z" fill="#1a1a1a"/>
+
+        <!-- Triceps / biceps (arms) -->
+        <path id="m-biceps-g" d="M70 155 C50 175,50 220,70 240 C85 220,90 180,70 155 Z" fill="#222"/>
+        <path id="m-biceps-d" d="M230 155 C250 175,250 220,230 240 C215 220,210 180,230 155 Z" fill="#222"/>
+
+        <path id="m-triceps-g" d="M62 240 C42 260,40 300,70 320 C85 300,90 270,62 240 Z" fill="#222"/>
+        <path id="m-triceps-d" d="M238 240 C258 260,260 300,230 320 C215 300,210 270,238 240 Z" fill="#222"/>
+
+        <!-- Abs -->
+        <path id="m-abdominaux" d="M134 220 C140 235,160 235,166 220 C170 200,160 190,150 190 C140 190,130 200,134 220 Z" fill="#222"/>
+
+        <!-- Glutes -->
+        <path id="m-fessiers" d="M118 280 C140 320,160 320,182 280 C190 260,180 250,150 250 C120 250,110 260,118 280 Z" fill="#222"/>
+
+        <!-- Quads -->
+        <path id="m-quadriceps-g" d="M115 300 C100 330,95 380,110 420 C125 390,130 320,115 300 Z" fill="#222"/>
+        <path id="m-quadriceps-d" d="M185 300 C200 330,205 380,190 420 C175 390,170 320,185 300 Z" fill="#222"/>
+
+        <!-- Ischios / hamstrings -->
+        <path id="m-ischios-g" d="M108 420 C95 450,100 480,120 520 C130 500,120 455,108 420 Z" fill="#222"/>
+        <path id="m-ischios-d" d="M192 420 C205 450,200 480,180 520 C170 500,180 455,192 420 Z" fill="#222"/>
+
+        <!-- Mollets -->
+        <path id="m-mollets-g" d="M118 520 C120 540,125 560,140 580 C135 560,130 540,118 520 Z" fill="#222"/>
+        <path id="m-mollets-d" d="M182 520 C180 540,175 560,160 580 C165 560,170 540,182 520 Z" fill="#222"/>
+
+        <!-- Forearms (small) -->
+        <path id="m-avantbras-g" d="M60 320 C50 340,52 360,70 370 C72 350,68 330,60 320 Z" fill="#222"/>
+        <path id="m-avantbras-d" d="M240 320 C250 340,248 360,230 370 C228 350,232 330,240 320 Z" fill="#222"/>
+
+        <!-- Add small IDless outline for aesthetics -->
+        <rect x="0" y="0" width="300" height="600" fill="none"/>
+      </svg>
+
+      <div class="legend" aria-hidden="true">
+        <div class="box" id="legend0" style="background:#777"></div><div class="small">Faible</div>
+        <div class="box" id="legend1" style="background:#ffd37b"></div><div class="small">Moyen</div>
+        <div class="box" id="legend2" style="background:#ff9a2a"></div><div class="small">Élevé</div>
+        <div class="box" id="legend3" style="background:#ff3b00"></div><div class="small">Max</div>
+      </div>
+
+      <div class="controls">
+        <button id="btnRefresh">Actualiser heatmap</button>
+        <button id="btnExport" title="Exporter carte en PNG">Exporter PNG</button>
+        <button id="btnReset" class="ghost">Réinitialiser données</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="title">Données & graphiques</div>
+
+    <div class="small">Changer la semaine via state (exemple) ou ajouter tes données réelles.</div>
+
+    <div class="chartwrap">
+      <canvas id="barChart"></canvas>
+      <canvas id="radarChart"></canvas>
+    </div>
+
+    <div class="small" style="margin-top:10px">Programmes simulés (tu peux les remplacer par les tiennes).</div>
+    <pre id="debug" style="background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;margin-top:10px;color:var(--muted);max-height:160px;overflow:auto"></pre>
+
+    <div class="footer">Tip: survole un muscle pour voir détails — exporte la carte pour l'utiliser ailleurs.</div>
+  </section>
+</main>
+
+<div id="tooltip" class="tooltip" style="display:none"></div>
+
+<script>
+/* =======================
+   DATA (exemple) & mapping
+   ======================= */
+
+// Exemple de programme / historique (tu peux charger depuis localStorage ou API)
+const state = {
+  week: 2, // semaine en cours (1..26)
+  // programmes — chaque séance liste les exercices et les muscles ciblés avec "poids" (volume) indicatif
+  programs: [
+    {
+      key: 'dimanche',
+      title: 'Dos + Jambes lourdes',
+      exercises: [
+        { name:'Trap Bar Deadlift', muscles:['Quadriceps','Fessiers','Ischios','Dos'], volume: 12000 },
+        { name:'Goblet Squat', muscles:['Quadriceps','Fessiers'], volume: 6000 },
+        { name:'Lat Pulldown', muscles:['Dos','Biceps'], volume: 4200 }
+      ]
+    },
+    {
+      key: 'mardi',
+      title: 'Pecs + Épaules + Bras',
+      exercises: [
+        { name:'Dumbbell Press', muscles:['Pectoraux','Épaules'], volume: 7200 },
+        { name:'Lateral Raises', muscles:['Épaules'], volume: 1800 },
+        { name:'Cable Curl', muscles:['Biceps','Avant-bras'], volume: 1500 }
+      ]
+    },
+    {
+      key: 'vendredi',
+      title: 'Dos + Jambes légères + Bras',
+      exercises: [
+        { name:'Leg Curl', muscles:['Ischios'], volume: 3000 },
+        { name:'Dumbbell Fly', muscles:['Pectoraux'], volume: 2700 },
+        { name:'EZ Bar Curl', muscles:['Biceps'], volume: 2400 }
+      ]
+    }
+  ]
+};
+
+// mapping logique entre noms "muscle" et ids SVG
+const MUSCLE_TO_SVG_ID = {
+  'Pectoraux': 'm-pectoraux',
+  'Épaules': ['m-epaules-g','m-epaules-d'],
+  'Dos': 'm-dos',
+  'Biceps': ['m-biceps-g','m-biceps-d'],
+  'Triceps': ['m-triceps-g','m-triceps-d'],
+  'Quadriceps': ['m-quadriceps-g','m-quadriceps-d'],
+  'Ischios': ['m-ischios-g','m-ischios-d'],
+  'Mollets': ['m-mollets-g','m-mollets-d'],
+  'Fessiers': 'm-fessiers',
+  'Abdominaux': 'm-abdominaux',
+  'Avant-bras': ['m-avantbras-g','m-avantbras-d'],
+  'Trapèzes': 'm-trapezes'
+};
+
+// poids/points par rôle — primary/secondary concept simplified by volume sharing in exercises
+// We'll attribute each exercise volume equally to listed muscles (could be weighted)
+function computeMuscleLoads(state){
+  // accumulate loads per muscle name
+  const loads = {};
+  state.programs.forEach(session=>{
+    session.exercises.forEach(ex=>{
+      const perMuscle = ex.volume / Math.max(1, ex.muscles.length);
+      ex.muscles.forEach(m=>{
+        loads[m] = (loads[m] || 0) + perMuscle;
+      });
+    });
+  });
+  return loads;
+}
+
+/* =======================
+   Color scale (gradient)
+   ======================= */
+function getColorForValue(v, max) {
+  // v between 0..max -> colors from grey -> yellow -> orange -> red
+  if (max <= 0) return '#666';
+  const t = Math.min(1, Math.max(0, v/max));
+  // We'll do a three-stop interpolation via HSL for nicer visuals
+  const grey = {h: 30, s: 4, l: 40}; // approx grey-brown
+  const yellow = {h: 42, s: 90, l: 60};
+  const orange = {h: 30, s: 90, l: 50};
+  const red = {h: 12, s: 90, l: 48};
+  // Map t: 0..0.33 -> grey->yellow, 0.33..0.66 -> yellow->orange, 0.66..1 -> orange->red
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  function interp(c1,c2,u){
+    return `hsl(${Math.round(lerp(c1.h,c2.h,u))} ${Math.round(lerp(c1.s,c2.s,u))}% ${Math.round(lerp(c1.l,c2.l,u))}%)`;
+  }
+  if (t < 0.33) {
+    return interp(grey, yellow, t/0.33);
+  } else if (t < 0.66) {
+    return interp(yellow, orange, (t-0.33)/0.33);
+  } else {
+    return interp(orange, red, (t-0.66)/0.34);
+  }
+}
+
+/* =======================
+   Apply heatmap to SVG
+   ======================= */
+const tooltip = document.getElementById('tooltip');
+
+function applyHeatmap(){
+  const loads = computeMuscleLoads(state);
+  // compute max for normalization
+  const maxLoad = Math.max(1, ...Object.values(loads));
+  // For debug show loads
+  document.getElementById('debug').textContent = JSON.stringify(loads, null, 2);
+
+  // Reset all shapes first
+  Object.values(MUSCLE_TO_SVG_ID).flat().forEach(id=>{
+    const el = document.getElementById(id);
+    if(el){ el.style.transition='fill 400ms ease'; el.style.fill = '#222'; el.style.filter='none'; }
+  });
+
+  // Apply filled colors
+  Object.entries(loads).forEach(([muscle, load])=>{
+    const svgRef = MUSCLE_TO_SVG_ID[muscle];
+    const color = getColorForValue(load, maxLoad);
+    if (!svgRef) return;
+    const ids = Array.isArray(svgRef) ? svgRef : [svgRef];
+    ids.forEach(id=>{
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.fill = color;
+      el.style.filter = 'drop-shadow(0 2px 6px rgba(0,0,0,0.6))';
+      // store data on element for tooltip
+      el.dataset.muscle = muscle;
+      el.dataset.load = Math.round(load);
+      el.dataset.color = color;
+    });
+  });
+
+  // Attach hover listeners
+  attachHoverHandlers(loads, maxLoad);
+}
+
+/* =======================
+   Hover handlers & tooltip
+   ======================= */
+function attachHoverHandlers(loads, maxLoad){
+  const svg = document.getElementById('muscleSVG');
+  // remove previous listeners by cloning? We'll add one set and avoid duplicates:
+  svg.querySelectorAll('[id^="m-"]').forEach(el=>{
+    el.onmouseenter = function(e){
+      const muscle = el.dataset.muscle || getMuscleBySvgId(el.id) || 'Muscle';
+      const load = el.dataset.load || Math.round(loads[muscle]||0);
+      // collect exercises that mention this muscle
+      const exercises = [];
+      state.programs.forEach(s=>{
+        s.exercises.forEach(ex=>{
+          if (ex.muscles.includes(muscle)) exercises.push(ex.name + ' (' + ex.volume + 'kg)');
+        })
+      });
+      showTooltip(e.pageX + 12, e.pageY + 12, muscle, load, exercises);
+      // subtle enlarge
+      el.style.transform = 'scale(1.02)';
+      el.style.transition = 'transform 180ms';
+    };
+    el.onmousemove = function(e){
+      tooltip.style.left = (e.pageX + 12) + 'px';
+      tooltip.style.top = (e.pageY + 12) + 'px';
+    };
+    el.onmouseleave = function(){
+      hideTooltip();
+      el.style.transform = 'scale(1)';
+    };
+  });
+}
+
+function getMuscleBySvgId(id){
+  for(const [name, ref] of Object.entries(MUSCLE_TO_SVG_ID)){
+    if(Array.isArray(ref)){
+      if(ref.indexOf(id) >= 0) return name;
+    } else if(ref === id) return name;
+  }
+  return null;
+}
+
+function showTooltip(x,y,muscle,load,exercises){
+  tooltip.style.display = 'block';
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = y + 'px';
+  tooltip.innerHTML = `<div style="font-weight:800;color:${getColorForValue(load, Math.max(1,load*1.5))}">${muscle}</div>
+                       <div class="small">Charge approx: <strong>${load} pts</strong></div>
+                       <div class="small" style="margin-top:6px">${exercises.slice(0,4).join('<br>') || ''}</div>`;
+}
+function hideTooltip(){ tooltip.style.display = 'none'; tooltip.innerHTML = ''; }
+
+/* =======================
+   Charts (Chart.js)
+   ======================= */
+let barChart, radarChart;
+function renderCharts(){
+  const ctxBar = document.getElementById('barChart').getContext('2d');
+  const ctxRadar = document.getElementById('radarChart').getContext('2d');
+
+  // Prepare data: total volume per session
+  const sessionLabels = state.programs.map(s=>s.title);
+  const sessionVolumes = state.programs.map(s => s.exercises.reduce((a,b)=>a + b.volume, 0));
+
+  if (barChart) barChart.destroy();
+  barChart = new Chart(ctxBar, {
+    type: 'bar',
+    data: { labels: sessionLabels, datasets:[{ label: 'Volume séance (kg)', data: sessionVolumes, backgroundColor: 'rgba(255,130,30,0.85)' }] },
+    options: { plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, ticks:{color:'#fff'}, grid:{color:'rgba(255,255,255,0.05)'}}, x:{ticks:{color:'#fff'}} } }
+  });
+
+  // Radar: muscles intensity (normalized)
+  const loads = computeMuscleLoads(state);
+  const muscleNames = Object.keys(loads);
+  const muscleValues = muscleNames.map(n => Math.round(loads[n] / 1000)); // scaled for radar
+  if (radarChart) radarChart.destroy();
+  radarChart = new Chart(ctxRadar, {
+    type: 'radar',
+    data: {
+      labels: muscleNames,
+      datasets: [{ label: 'Intensité relative (k)', data: muscleValues, backgroundColor:'rgba(255,100,0,0.25)', borderColor:'#ff8a00', pointBackgroundColor:'#ff8a00' }]
+    },
+    options: { scales:{ r:{ticks:{color:'#fff'}, pointLabels:{color:'#fff'}, grid:{color:'rgba(255,255,255,0.06)'} } }, plugins:{legend:{labels:{color:'#fff'}}} }
+  });
+}
+
+/* =======================
+   Export SVG -> PNG
+   ======================= */
+async function exportSvgToPng(){
+  try {
+    const svgEl = document.getElementById('muscleSVG');
+    // Inline computed styles so colors keep
+    const clone = svgEl.cloneNode(true);
+    // ensure width/height preserved
+    const svgString = new XMLSerializer().serializeToString(clone);
+    const blob = new Blob([svgString], {type:'image/svg+xml;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = function(){
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth * 2; // higher res
+      canvas.height = img.naturalHeight * 2;
+      const ctx = canvas.getContext('2d');
+      // fill background for better look
+      ctx.fillStyle = '#071020';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(img, 0,0,canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(function(blobOut){
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blobOut);
+        a.download = 'heatmap_musculaire.png';
+        a.click();
+      }, 'image/png');
+    };
+    img.src = url;
+  } catch(err){
+    alert('Erreur export: ' + err.message);
+    console.error(err);
+  }
+}
+
+/* =======================
+   UI wiring
+   ======================= */
+document.getElementById('btnRefresh').addEventListener('click', ()=>{
+  applyHeatmap();
+  renderCharts();
+});
+document.getElementById('btnExport').addEventListener('click', exportSvgToPng);
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  if(!confirm('Réinitialiser exemples et reload ?')) return;
+  // reset demo state
+  localStorage.removeItem('ultimate-demo-v5');
+  location.reload();
+});
+
+// open the tooltip if click outside hide
+document.addEventListener('click', (e)=>{ if(!e.target.closest('#muscleSVG')) hideTooltip(); });
+
+/* =======================
+   initial render
+   ======================= */
+applyHeatmap();
+renderCharts();
+
+// also allow switching week quickly with keyboard +/- for demo
+window.addEventListener('keydown', (e)=>{
+  if(e.key === '+' || e.key === '='){ state.week = Math.min(26, state.week + 1); applyHeatmap(); renderCharts(); }
+  if(e.key === '-') { state.week = Math.max(1, state.week - 1); applyHeatmap(); renderCharts(); }
+});
+</script>
+</body>
+</html>
